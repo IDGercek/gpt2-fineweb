@@ -75,7 +75,7 @@ class GPT(nn.Module):
         pos = torch.arange(0, T, dtype=torch.long, device=idx.device) # (T)
         # position embeddings --> (T, n_embd)
         # token embeddings    --> (B, T, n_embd)
-        x = self.dropout(self.transformer.wpe(pos) + self.transformer.wte(idx))
+        x = self.dropout(self.tok_embd(pos) + self.pos_embd(idx))
 
         # Forward the blocks of transformer
         for block in self.hidden:
