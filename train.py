@@ -72,6 +72,7 @@ dataloader = DataLoader(
         num_workers=config.num_workers,
         prefetch_factor=config.prefetch_factor
 )
+print(f"DataLoader initialized with {len(dataloader)} batches.")
 
 ## -------- Model --------
 
@@ -104,11 +105,14 @@ for step, batch in enumerate(dataloader):
     # Zero gradients
     optimizer.zero_grad()
 
-    # Forward pass
-    logits = model(input_ids, key_padding_mask=key_padding_mask)
+    with torch.autocast(device_type=device):
+        # Forward pass
+        logits = model(input_ids, key_padding_mask=key_padding_mask)
+
+        # Loss
+        loss = criterion(logits.view(-1, logits.size(-1)), labels.view(-1))
 
     # Backpropagation
-    loss = criterion(logits.view(-1, logits.size(-1)), labels.view(-1))
     loss.backward()
     optimizer.step()
 
@@ -118,6 +122,6 @@ for step, batch in enumerate(dataloader):
     data_prep = (t1 - t0) * 1000
     step_time = (t2 - t1) * 1000
 
-    if step % epoch_print_interval == 0:
+    if step % epoch_print_interval == 0 or step == max_steps-1:
         print(f"Step: {step} | Loss: {loss.item():.4f} | Data Prep: {data_prep:.2f}ms | Step Time: {step_time:.2f}ms")
 
