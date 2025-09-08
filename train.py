@@ -21,7 +21,7 @@ class TrainingConfig:
 
     # Training
     batch_size: int = 4
-    learning_rate: float = 1e-4
+    learning_rate: float = 3e-4
     ignore_index: int = -100
     
 
@@ -101,7 +101,7 @@ for step, batch in enumerate(dataloader):
     # Zero gradients
     optimizer.zero_grad()
 
-    with torch.autocast(device_type=device):
+    with torch.autocast(device_type=device, dtype=torch.float16):
         # Forward pass
         logits = model(input_ids, key_padding_mask=key_padding_mask)
 
@@ -115,7 +115,7 @@ for step, batch in enumerate(dataloader):
     if step % epoch_print_interval == 0:
         # Time calculatipn
         torch.cuda.synchronize()
-        average_step_time = (t - time.time()) * 1000 / epoch_print_interval # in milliseconds
+        average_step_time = (time.time() - t) * 1000 / epoch_print_interval # in milliseconds
         t = time.time()
 
         print(f"Step: {step} | Loss: {loss.item():.4f} | Avg Step Time: {average_step_time:.2f}ms")
