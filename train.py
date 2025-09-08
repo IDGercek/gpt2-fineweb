@@ -96,8 +96,8 @@ for step, batch in enumerate(dataloader):
     # Data comes in shape (max_len, batch_size). We convert it to (batch_size, max_len) with torch.stack
     input_ids = torch.stack(batch["input_ids"], dim=1).to(device)
     labels = torch.stack(batch["labels"], dim=1).to(device)
-    attn_mask = torch.stack(batch["attention_mask"], dim=1).to(device)
-    attn_mask = attn_mask == 0 # convert from int to bool
+    key_padding_mask = torch.stack(batch["attention_mask"], dim=1).to(device)
+    key_padding_mask = key_padding_mask == 0 # convert from int to bool
 
     t1 = time.time() # Data preparation time
 
@@ -105,7 +105,7 @@ for step, batch in enumerate(dataloader):
     optimizer.zero_grad()
 
     # Forward pass
-    logits = model(input_ids, attn_mask)
+    logits = model(input_ids, key_padding_mask=key_padding_mask)
 
     # Backpropagation
     loss = criterion(logits.view(-1, logits.size(-1)), labels.view(-1))
