@@ -23,7 +23,9 @@ class Attention(nn.Module):
                                           dropout=config.dropout,
                                           batch_first=True)
     def forward(self, x, key_padding_mask=None):
-        out, _ = self.attn(x, x, x, is_causal=True, key_padding_mask=key_padding_mask)
+        T = x.size(1)
+        causal_mask = torch.triu(torch.ones(T, T, device=x.device, dtype=torch.bool), diagonal=1)
+        out, _ = self.attn(x, x, x, key_padding_mask=key_padding_mask, attn_mask=causal_mask, is_causal=True)
         return out
 
 class Block(nn.Module):
