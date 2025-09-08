@@ -87,7 +87,7 @@ optimizer = torch.optim.AdamW(params=model.parameters(), lr=config.learning_rate
 
 epochs = 1
 max_steps = epochs * ds_samples
-epoch_print_interval = 10
+epoch_print_interval = 1
 print(f"Training for {max_steps} steps:")
 
 for step, batch in enumerate(dataloader):
@@ -99,8 +99,6 @@ for step, batch in enumerate(dataloader):
     labels = torch.stack(batch["labels"], dim=1).to(device)
     key_padding_mask = torch.stack(batch["attention_mask"], dim=1).to(device)
     key_padding_mask = key_padding_mask == 0 # convert from int to bool
-
-    t1 = time.time() # Data preparation time
 
     # Zero gradients
     optimizer.zero_grad()
@@ -118,10 +116,9 @@ for step, batch in enumerate(dataloader):
 
     # Time calculation
     torch.cuda.synchronize()
-    t2 = time.time()
-    data_prep = (t1 - t0) * 1000
-    step_time = (t2 - t1) * 1000
+    t1 = time.time()
+    step_time = (t1 - t0) * 1000
 
-    if step % epoch_print_interval == 0 or step == max_steps-1:
-        print(f"Step: {step} | Loss: {loss.item():.4f} | Data Prep: {data_prep:.2f}ms | Step Time: {step_time:.2f}ms")
+    if step % epoch_print_interval == 0:
+        print(f"Step: {step} | Loss: {loss.item():.4f} | Step Time: {step_time:.2f}ms")
 
