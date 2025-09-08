@@ -95,7 +95,7 @@ for step, batch in enumerate(dataloader):
     # Data comes in shape (max_len, batch_size). We convert it to (batch_size, max_len) with torch.stack
     input_ids = torch.stack(batch["input_ids"], dim=1).to(device)
     labels = torch.stack(batch["labels"], dim=1).to(device)
-    attn_mask = torch.stack(batch["attn_mask"], dim=1).to(device)
+    attn_mask = torch.stack(batch["attention_mask"], dim=1).to(device)
 
     t1 = time.time() # Data preparation time
 
