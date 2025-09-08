@@ -72,7 +72,6 @@ dataloader = DataLoader(
         num_workers=config.num_workers,
         prefetch_factor=config.prefetch_factor
 )
-print(f"DataLoader initialized with {len(dataloader)} batches.")
 
 ## -------- Model --------
 
