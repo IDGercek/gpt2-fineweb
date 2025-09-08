@@ -17,11 +17,11 @@ class TrainingConfig:
     # Data
     ds_proportion: float = 0.00001
     num_workers: int = 2
-    prefetch_factor: int = 4
+    prefetch_factor: int = 2
 
     # Training
-    batch_size: int = 8
-    learning_rate: float = 1e-3
+    batch_size: int = 4
+    learning_rate: float = 1e-4
     ignore_index: int = -100
     
 
