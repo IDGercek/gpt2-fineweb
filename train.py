@@ -20,7 +20,7 @@ class TrainingConfig:
     prefetch_factor: int = 4
 
     # Training
-    batch_size: int = 4
+    batch_size: int = 8
     learning_rate: float = 1e-3
     ignore_index: int = -100
     
@@ -107,7 +107,7 @@ for step, batch in enumerate(dataloader):
     logits = model(input_ids, attn_mask)
 
     # Backpropagation
-    loss = criterion(logits, labels)
+    loss = criterion(logits.view(-1, logits.size(-1)), labels.view(-1))
     loss.backward()
     optimizer.step()
 
