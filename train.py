@@ -96,6 +96,7 @@ for step, batch in enumerate(dataloader):
     input_ids = torch.stack(batch["input_ids"], dim=1).to(device)
     labels = torch.stack(batch["labels"], dim=1).to(device)
     attn_mask = torch.stack(batch["attention_mask"], dim=1).to(device)
+    attn_mask = attn_mask == 1 # convert from int to bool
 
     t1 = time.time() # Data preparation time
 
