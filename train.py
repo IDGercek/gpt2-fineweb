@@ -89,9 +89,8 @@ max_steps = epochs * ds_samples
 epoch_print_interval = 1
 print(f"Training for {max_steps} steps:")
 
+t = time.time() # Start time
 for step, batch in enumerate(dataloader):
-    t0 = time.time() # Start time
-
     # Prepare data
     # Data comes in shape (max_len, batch_size). We convert it to (batch_size, max_len) with torch.stack
     input_ids = torch.stack(batch["input_ids"], dim=1).to(device)
@@ -113,11 +112,11 @@ for step, batch in enumerate(dataloader):
     loss.backward()
     optimizer.step()
 
-    # Time calculation
-    torch.cuda.synchronize()
-    t1 = time.time()
-    step_time = (t1 - t0) * 1000
-
     if step % epoch_print_interval == 0:
-        print(f"Step: {step} | Loss: {loss.item():.4f} | Step Time: {step_time:.2f}ms")
+        # Time calculatipn
+        torch.cuda.synchronize()
+        average_step_time = (t - time.time()) * 1000 / epoch_print_interval # in milliseconds
+        t = time.time()
+
+        print(f"Step: {step} | Loss: {loss.item():.4f} | Avg Step Time: {average_step_time:.2f}ms")
 
