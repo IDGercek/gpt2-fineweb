@@ -23,7 +23,7 @@ class Attention(nn.Module):
                                           dropout=config.dropout,
                                           batch_first=True)
     def forward(self, x, key_padding_mask=None):
-        out, _ = self.attn(x, x, x, is_casual=True, key_padding_mask=key_padding_mask)
+        out, _ = self.attn(x, x, x, is_causal=True, key_padding_mask=key_padding_mask)
         return out
 
 class Block(nn.Module):
