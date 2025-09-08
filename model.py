@@ -22,8 +22,8 @@ class Attention(nn.Module):
                                           num_heads=config.n_head,
                                           dropout=config.dropout,
                                           batch_first=True)
-    def forward(self, x, attn_mask=None):
-        out, _ = self.attn(x, x, x, key_padding_mask=attn_mask)
+    def forward(self, x, key_padding_mask=None):
+        out, _ = self.attn(x, x, x, is_casual=True, key_padding_mask=key_padding_mask)
         return out
 
 class Block(nn.Module):
@@ -43,9 +43,9 @@ class Block(nn.Module):
 
         self.dropout = nn.Dropout(config.dropout)
 
-    def forward(self, x, attn_mask=None):
+    def forward(self, x, key_padding_mask=None):
         # We apply layer normalization before attention to have better gradient flow in the residual stream.
-        x = x + self.dropout(self.attn(self.ln_1(x), attn_mask=attn_mask))
+        x = x + self.dropout(self.attn(self.ln_1(x), key_padding_mask=key_padding_mask))
         x = x + self.mlp(self.ln_2(x))
         return x
 
@@ -55,8 +55,8 @@ class GPT(nn.Module):
 
         self.config = config
 
-        self.tok_embd = nn.Embedding(config.vocab_size, config.n_embd) # Token embeddings
-        self.pos_embd = nn.Embedding(config.vocab_size, config.n_embd) # Positional embeddings
+        self.tok_embd = nn.Embedding(config.block_size, config.n_embd) # Token embeddings
+        self.pos_embd = nn.Embedding(config.block_size, config.n_embd) # Positional embeddings
 
         self.hidden = nn.ModuleList([Block(config) for _ in range(config.n_layer)]) # Transformer blocks
 
@@ -67,7 +67,7 @@ class GPT(nn.Module):
 
         self.dropout = nn.Dropout(config.dropout) # Dropout
 
-    def forward(self, idx, attn_mask=None):
+    def forward(self, idx, key_padding_mask=None):
         B, T = idx.size()
         assert T <= self.config.block_size, f"Cannot forward sequence of length {T}, block size is only {self.config.block_size}"
 
@@ -75,11 +75,11 @@ class GPT(nn.Module):
         pos = torch.arange(0, T, dtype=torch.long, device=idx.device) # (T)
         # position embeddings --> (T, n_embd)
         # token embeddings    --> (B, T, n_embd)
-        x = self.dropout(self.tok_embd(pos) + self.pos_embd(idx))
+        x = self.dropout(self.tok_embd(idx) + self.pos_embd(pos))
 
         # Forward the blocks of transformer
         for block in self.hidden:
-            x = block(x, attn_mask=attn_mask)
+            x = block(x, key_padding_mask=key_padding_mask)
 
         # Final projection
         x = self.ln_final(x)

@@ -27,6 +27,16 @@ class TrainingConfig:
 
 config = TrainingConfig()
 
+model_config = GPTConfig(
+    block_size=1024,
+    vocab_size=50257,
+    n_layer=12,
+    n_head=12,
+    n_embd=768,
+    hidden_size= 4 * 768,
+    dropout=0.2
+)
+
 ## -------- Data --------
 
 # Load the dataset and metadata
@@ -65,15 +75,6 @@ dataloader = DataLoader(
 
 ## -------- Model --------
 
-model_config = GPTConfig(
-    block_size=1024,
-    vocab_size=50257,
-    n_layer=12,
-    n_head=12,
-    n_embd=768,
-    hidden_size= 4 * 768,
-    dropout=0.2
-)
 model = GPT(model_config).to(device)
 parameter_count = sum([p.numel() for p in model.parameters()])
 print(f"Model initialized with {'{:,}'.format(parameter_count)} parameters")
@@ -96,7 +97,7 @@ for step, batch in enumerate(dataloader):
     input_ids = torch.stack(batch["input_ids"], dim=1).to(device)
     labels = torch.stack(batch["labels"], dim=1).to(device)
     attn_mask = torch.stack(batch["attention_mask"], dim=1).to(device)
-    attn_mask = attn_mask == 1 # convert from int to bool
+    attn_mask = attn_mask == 0 # convert from int to bool
 
     t1 = time.time() # Data preparation time
 
