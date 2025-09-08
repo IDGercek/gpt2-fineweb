@@ -88,14 +88,14 @@ max_steps = epochs * ds_samples
 epoch_print_interval = 10
 print(f"Training for {max_steps} steps:")
 
-for step, (input_ids, labels, attn_mask) in enumerate(dataloader):
+for step, batch in enumerate(dataloader):
     t0 = time.time() # Start time
 
     # Prepare data
     # Data comes in shape (max_len, batch_size). We convert it to (batch_size, max_len) with torch.stack
-    input_ids = torch.stack(input_ids, dim=1).to(device)
-    labels = torch.stack(labels, dim=1).to(device)
-    attn_mask = torch.stack(attn_mask, dim=1).to(device)
+    input_ids = torch.stack(batch["input_ids"], dim=1).to(device)
+    labels = torch.stack(batch["labels"], dim=1).to(device)
+    attn_mask = torch.stack(batch["attn_mask"], dim=1).to(device)
 
     t1 = time.time() # Data preparation time
 
